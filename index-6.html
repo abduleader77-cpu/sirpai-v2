@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SIR P Ai</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SIR P Ai">
+<style>
+  :root{--bg:#e9efe9;--ink:#14301f;--me:#14301f;--me-ink:#f4f8f4;--bot:#fff;--accent:#f2a900;--muted:#4a6354;--red:#9b2c1d}
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+  header{padding:8px 12px;border-bottom:2px solid var(--ink);display:flex;align-items:center;gap:8px}
+  header img{width:34px;height:34px;border-radius:9px}
+  header h1{font-size:1.05rem;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ib{width:44px;height:44px;border:1px solid var(--ink);border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;color:var(--ink)}
+  .ib:disabled{opacity:.4}
+  .hbtn{background:none;border:1px solid var(--ink);color:var(--ink);border-radius:6px;padding:5px 10px;font:inherit;font-size:.85rem;cursor:pointer}
+  #findbar{display:none;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--ink);background:#fff}
+  #findbar.open{display:flex}
+  #findbar input{flex:1;min-width:0;height:44px;border:1px solid var(--ink);border-radius:8px;padding:0 10px;font:inherit}
+  #fc{font-size:.8rem;color:var(--muted);min-width:56px;text-align:center}
+  #chat{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+  .msg{max-width:92%;padding:10px 14px;border-radius:14px;line-height:1.5;word-wrap:break-word;overflow-wrap:anywhere}
+  .msg.hit{outline:2px solid var(--accent)} .msg.cur{outline:3px solid var(--ink)}
+  .me{align-self:flex-end;background:var(--me);color:var(--me-ink);border-bottom-right-radius:3px;white-space:pre-wrap}
+  .bot{align-self:flex-start;background:var(--bot);border-bottom-left-radius:3px}
+  .bot .text p{margin:0 0 .7em}.bot .text>*:last-child{margin-bottom:0}
+  .bot h3,.bot h4{margin:.9em 0 .4em;font-size:1.05rem}
+  .bot ul,.bot ol{margin:0 0 .7em;padding-left:1.3em}
+  .bot hr{border:none;border-top:1px solid #c9d6cc;margin:.9em 0}
+  .bot code{background:#eef3ee;border-radius:4px;padding:1px 5px;font-family:Menlo,Consolas,monospace;font-size:.88em}
+  .bot pre{background:#eef3ee;border-radius:8px;padding:10px;overflow-x:auto;margin:0 0 .7em}.bot pre code{background:none;padding:0}
+  .tablewrap{overflow-x:auto;margin:0 0 .7em}.bot table{border-collapse:collapse;font-size:.9rem}
+  .bot th,.bot td{border:1px solid #c9d6cc;padding:5px 8px;text-align:left}.bot th{background:#eef3ee}
+  .copy{margin-top:8px;background:none;border:1px solid var(--muted);color:var(--muted);border-radius:6px;padding:3px 9px;font:inherit;font-size:.78rem;cursor:pointer}
+  .copy.done{color:var(--ink);border-color:var(--ink)}
+  .err{align-self:center;color:var(--red);font-size:.9rem;text-align:center}
+  .empty{margin:auto;text-align:center;color:var(--muted)}
+  .empty img{width:84px;height:84px;border-radius:22px;display:block;margin:0 auto 12px}
+  .me img.thumb{max-width:160px;max-height:160px;border-radius:8px;display:block;margin-bottom:6px}
+  .me .att{font-size:.8rem;opacity:.85;margin-top:4px}
+  #chips{display:flex;flex-wrap:wrap;gap:6px;padding:6px 12px 0}
+  .chip{background:#fff;border:1px solid var(--ink);border-radius:999px;padding:3px 6px 3px 10px;font-size:.8rem;display:flex;gap:4px;align-items:center;max-width:100%}
+  .chip button{border:none;background:none;font:inherit;color:var(--red);cursor:pointer;padding:0 4px}
+  .tools{display:flex;gap:8px;align-items:center;padding:8px 12px 0}
+  #think{border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:5px 12px;font:inherit;font-size:.85rem;cursor:pointer;min-height:36px}
+  #think[aria-pressed="true"]{background:var(--ink);color:var(--me-ink)}
+  form{display:flex;gap:8px;padding:8px 12px 12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+  textarea{flex:1;resize:none;border:1px solid var(--ink);border-radius:10px;padding:10px;font:inherit;max-height:120px;background:#fff;color:var(--ink)}
+  #send{background:var(--accent);color:var(--ink);border:none;border-radius:10px;padding:0 18px;font:inherit;font-weight:bold}
+  #send:disabled{opacity:.5}
+  :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  #panel{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;z-index:10;padding-top:env(safe-area-inset-top,0px)}
+  #panel.open{display:flex}
+  #panel .search{padding:10px 14px 0}
+  #panel .search input{width:100%;height:44px;border:1px solid var(--ink);border-radius:10px;padding:0 12px;font:inherit}
+  #list{flex:1;overflow-y:auto;padding:6px 14px 20px;display:flex;flex-direction:column;gap:8px}
+  .lab{font-size:.8rem;font-weight:bold;color:var(--muted);padding:10px 4px 0;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
+  .lab button{margin-left:auto;background:none;border:1px solid var(--red);color:var(--red);border-radius:6px;font:inherit;font-size:.75rem;padding:2px 8px;cursor:pointer}
+  .item{text-align:left;background:#fff;border:1px solid var(--ink);border-radius:10px;padding:10px 14px;min-height:56px;font:inherit;color:var(--ink);cursor:pointer;width:100%}
+  .item .t{font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.item .s{font-size:.75rem;color:var(--muted)}
+  .none{color:var(--muted);text-align:center;padding:30px 0}
+  #sheet{position:fixed;inset:0;display:none;background:rgba(20,48,31,.55);z-index:20;align-items:flex-end}
+  #sheet.open{display:flex}
+  .box{background:#fff;border-radius:18px 18px 0 0;width:100%;padding:12px 0 calc(16px + env(safe-area-inset-bottom,0px));max-height:82vh;overflow:auto}
+  .box h2{font-size:1.05rem;margin:0;padding:4px 20px 8px}
+  .srow{min-height:52px;display:flex;align-items:center;gap:14px;padding:0 20px;font:inherit;font-size:1rem;width:100%;background:none;border:none;color:var(--ink);text-align:left;cursor:pointer}
+  .srow.danger{color:var(--red)}
+  .note{padding:6px 20px 0;font-size:.78rem;color:var(--muted);line-height:1.4}
+  #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-size:.85rem;display:none;z-index:30;max-width:90%;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <img src="icon-192.png" alt="SIR P Ai logo">
+  <h1 id="title">SIR P Ai</h1>
+  <button id="bHist" class="ib" type="button" aria-label="History"></button>
+  <button id="bNew" class="ib" type="button" aria-label="New chat"></button>
+  <button id="bOpt" class="ib" type="button" aria-label="Chat options"></button>
+</header>
+<div id="findbar">
+  <input id="fq" type="search" placeholder="Find in this chat" aria-label="Find in this chat">
+  <span id="fc"></span>
+  <button id="fprev" class="hbtn" type="button" aria-label="Previous match">Prev</button>
+  <button id="fnext" class="hbtn" type="button" aria-label="Next match">Next</button>
+  <button id="fclose" class="hbtn" type="button">Close</button>
+</div>
+<div id="chat"></div>
+<div class="tools"><button id="think" type="button" aria-pressed="false">Think deeper</button></div>
+<div id="chips"></div>
+<form id="form">
+  <button id="attach" class="ib" type="button" aria-label="Attach a picture or file" style="font-size:1.4rem">+</button>
+  <input type="file" id="file" multiple hidden accept="image/*,.pdf,.txt,.md,.csv,.tsv,.json,.js,.ts,.py,.html,.css,.xml,.log,.java,.c,.cpp,.h,.cs,.go,.rs,.php,.rb,.sql,.yml,.yaml,.ini,.sh">
+  <textarea id="input" rows="1" placeholder="Type a message" aria-label="Message"></textarea>
+  <button id="send" type="submit">Send</button>
+</form>
+
+<div id="panel">
+  <header>
+    <button id="pClose" class="ib" type="button" aria-label="Back"></button>
+    <h1>History</h1>
+    <button id="pProj" class="hbtn" type="button">New project</button>
+  </header>
+  <div class="search"><input id="hq" type="search" placeholder="Search your chats" aria-label="Search your chats"></div>
+  <div id="list"></div>
+</div>
+<div id="sheet"></div>
+<div id="toast" role="status"></div>
+
+<script>
+const WORKER_URL = "https://jolly-glitter-373f.abduleader77.workers.dev";
+const $ = (id) => document.getElementById(id);
+const ICON = {
+  hist:'<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/>',
+  plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  dots:'<circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/>',
+  back:'<polyline points="15 5 8 12 15 19"/>',
+  share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/>',
+  pin:'<path d="M12 17v5"/><path d="M9 3h6l-1 6 3 3H7l3-3z"/>',
+  folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  clip:'<path d="M20 11l-8 8a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/>',
+  search:'<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/>',
+  home:'<path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
+  archive:'<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/><line x1="10" y1="13" x2="14" y2="13"/>',
+  trash:'<path d="M4 7h16"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/>'
+};
+function ico(n, col){ return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="' + (col || "currentColor") + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[n] + '</svg>'; }
+$("bHist").innerHTML = ico("hist"); $("bNew").innerHTML = ico("plus"); $("bOpt").innerHTML = ico("dots"); $("pClose").innerHTML = ico("back");
+
+/* ---------- saved data (this phone) ---------- */
+const KEY = "sirpai_v2_data", OLD = "sirpai_chats_v1";
+function load(){
+  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && Array.isArray(d.chats)) return d; } catch {}
+  let chats = [];
+  try { chats = (JSON.parse(localStorage.getItem(OLD)) || []).map((c) => ({ id: c.id, title: c.title, updated: c.updated || c.id, messages: c.messages || [], pinned: false, archived: false, project: null })); } catch {}
+  return { chats, projects: [] };
+}
+let data = load();
+function save(){ try { localStorage.setItem(KEY, JSON.stringify({ chats: data.chats.slice(0, 200), projects: data.projects }, (k, v) => (k === "files" || k === "textFiles") ? undefined : v)); } catch {} }
+let cur = null, think = false, pending = [], matches = [], findIdx = -1, deferred = null, showArchived = false;
+function ensureSaved(){ if (!data.chats.includes(cur)) data.chats.unshift(cur); }
+function toast(t){ const e = $("toast"); e.textContent = t; e.style.display = "block"; clearTimeout(toast.t); toast.t = setTimeout(() => { e.style.display = "none"; }, 2600); }
+const LOGO = "icon-192.png";
+function md(src){
+  const esc = (s) => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const blocks = [];
+  src = src.replace(/```[\w-]*\n?([\s\S]*?)```/g, (m, c) => {
+    blocks.push("<pre><code>" + esc(c.replace(/\n$/, "")) + "</code></pre>");
+    return "\u0000" + (blocks.length - 1) + "\u0000";
+  });
+  const inl = (s) => esc(s)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<em>$2</em>");
+  const out = []; let para = [], listType = null, table = [];
+  const fp = () => { if (para.length) { out.push("<p>" + para.map(inl).join("<br>") + "</p>"); para = []; } };
+  const fl = () => { if (listType) { out.push("</" + listType + ">"); listType = null; } };
+  const ft = () => {
+    if (!table.length) return;
+    const rows = table.filter((r) => !/^\s*\|?[\s:|-]+\|?\s*$/.test(r) || !/-/.test(r));
+    const cells = (r) => r.trim().replace(/^\||\|$/g, "").split("|").map((c) => inl(c.trim()));
+    let h = '<div class="tablewrap"><table>';
+    rows.forEach((r, i) => {
+      const tag = i === 0 ? "th" : "td";
+      h += "<tr>" + cells(r).map((c) => "<" + tag + ">" + c + "</" + tag + ">").join("") + "</tr>";
+    });
+    out.push(h + "</table></div>"); table = [];
+  };
+  for (const line of src.split("\n")) {
+    const t = line.trim();
+    if (t.startsWith("|")) { fp(); fl(); table.push(line); continue; } else ft();
+    let m;
+    if ((m = t.match(/^\u0000(\d+)\u0000$/))) { fp(); fl(); out.push(blocks[+m[1]]); }
+    else if ((m = t.match(/^(#{1,6})\s+(.*)$/))) { fp(); fl(); out.push("<h" + (m[1].length <= 2 ? 3 : 4) + ">" + inl(m[2]) + "</h" + (m[1].length <= 2 ? 3 : 4) + ">"); }
+    else if (/^(-{3,}|\*{3,}|_{3,})$/.test(t)) { fp(); fl(); out.push("<hr>"); }
+    else if ((m = line.match(/^\s*[-*+]\s+(.*)$/))) { fp(); if (listType !== "ul") { fl(); out.push("<ul>"); listType = "ul"; } out.push("<li>" + inl(m[1]) + "</li>"); }
+    else if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))) { fp(); if (listType !== "ol") { fl(); out.push("<ol>"); listType = "ol"; } out.push("<li>" + inl(m[1]) + "</li>"); }
+    else if (t === "") { fp(); fl(); }
+    else { fl(); para.push(t); }
+  }
+  fp(); fl(); ft();
+  return out.join("");
+}
+
+
+/* ---------- chat screen ---------- */
+function setTitle(){ $("title").textContent = cur && cur.messages.length ? cur.title : "SIR P Ai"; $("bOpt").disabled = !(cur && cur.messages.length); }
+function showEmpty(){ chat.innerHTML = '<div class="empty" id="empty"><img src="' + LOGO + '" alt="">Hello, I am SIR P Ai. Ask me anything.</div>'; }
+function clearEmpty(){ const e = $("empty"); if (e) e.remove(); }
+async function copyText(text){
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch { const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand("copy"); } catch {} ta.remove(); return ok; }
+}
+function addCopy(bubble, text){
+  const b = document.createElement("button"); b.className = "copy"; b.type = "button"; b.textContent = "Copy answer";
+  b.addEventListener("click", async () => { const ok = await copyText(text); b.textContent = ok ? "Copied" : "Copy failed"; b.classList.add("done"); setTimeout(() => { b.textContent = "Copy answer"; b.classList.remove("done"); }, 1500); });
+  bubble.appendChild(b);
+}
+function addMsg(role, text, extra){
+  clearEmpty();
+  const d = document.createElement("div");
+  d.className = "msg " + (role === "user" ? "me" : role === "err" ? "err" : "bot");
+  if (role === "user" && extra && extra.files) extra.files.filter((f) => f.mime.startsWith("image/")).forEach((f) => { const im = document.createElement("img"); im.className = "thumb"; im.src = "data:" + f.mime + ";base64," + f.data; im.alt = f.name; d.appendChild(im); });
+  const t = document.createElement("div"); t.className = "text";
+  if (role === "model") t.innerHTML = md(text); else t.textContent = text;
+  d.appendChild(t);
+  if (role === "user" && extra && extra.names && extra.names.length) { const a = document.createElement("div"); a.className = "att"; a.textContent = "Attached: " + extra.names.join(", "); d.appendChild(a); }
+  if (role === "model") addCopy(d, text);
+  chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
+  return d;
+}
+function renderChat(){ chat.innerHTML = ""; if (!cur.messages.length) { showEmpty(); return; } cur.messages.forEach((m) => addMsg(m.role, m.text, m)); }
+function newChat(){ cur = { id: Date.now(), title: "New chat", updated: Date.now(), messages: [], pinned: false, archived: false, project: null }; closeFind(); renderChat(); setTitle(); }
+function openChat(c){ cur = c; closeFind(); renderChat(); setTitle(); }
+$("think").addEventListener("click", () => { think = !think; $("think").setAttribute("aria-pressed", String(think)); });
+
+/* ---------- attachments ---------- */
+const chips = $("chips"), fileInput = $("file");
+$("attach").addEventListener("click", () => fileInput.click());
+const TEXT_EXT = /\.(txt|md|csv|tsv|json|js|ts|py|html|css|xml|log|java|c|cpp|h|cs|go|rs|php|rb|sql|yml|yaml|ini|sh)$/i;
+function drawChips(){
+  chips.innerHTML = "";
+  pending.forEach((p, i) => { const c = document.createElement("div"); c.className = "chip"; c.textContent = p.name; const x = document.createElement("button"); x.type = "button"; x.textContent = "\u2715"; x.setAttribute("aria-label", "Remove " + p.name); x.addEventListener("click", () => { pending.splice(i, 1); drawChips(); }); c.appendChild(x); chips.appendChild(c); });
+}
+function readB64(file){ return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1]); r.onerror = () => rej(new Error("Could not read the file")); r.readAsDataURL(file); }); }
+function shrinkImage(file){
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => { const s = Math.min(1, 1600 / Math.max(img.width, img.height)); const w = Math.round(img.width * s), h = Math.round(img.height * s); const c = document.createElement("canvas"); c.width = w; c.height = h; c.getContext("2d").drawImage(img, 0, 0, w, h); URL.revokeObjectURL(url); res(c.toDataURL("image/jpeg", 0.85).split(",")[1]); };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("Could not open this picture")); };
+    img.src = url;
+  });
+}
+fileInput.addEventListener("change", async () => {
+  for (const f of Array.from(fileInput.files)) {
+    if (pending.length >= 4) { addMsg("err", "You can attach up to 4 files at a time."); break; }
+    try {
+      if (f.type.startsWith("image/")) pending.push({ name: f.name, files: { name: f.name, mime: "image/jpeg", data: await shrinkImage(f) } });
+      else if (f.type === "application/pdf" || /\.pdf$/i.test(f.name)) { if (f.size > 10 * 1024 * 1024) throw new Error("This PDF is bigger than 10 MB"); pending.push({ name: f.name, files: { name: f.name, mime: "application/pdf", data: await readB64(f) } }); }
+      else if (f.type.startsWith("text/") || TEXT_EXT.test(f.name)) pending.push({ name: f.name, textFile: { name: f.name, content: (await f.text()).slice(0, 150000) } });
+      else throw new Error("This file type is not supported yet");
+    } catch (e) { addMsg("err", f.name + ": " + e.message); }
+  }
+  fileInput.value = ""; drawChips();
+});
+
+/* ---------- send ---------- */
+function buildPayload(){
+  const withFiles = []; cur.messages.forEach((m, i) => { if (m.files && m.files.length) withFiles.push(i); });
+  const keep = new Set(withFiles.slice(-3));
+  return cur.messages.map((m, i) => {
+    let text = m.text; (m.textFiles || []).forEach((f) => { text += "\n\n[File: " + f.name + "]\n" + f.content; });
+    const out = { role: m.role };
+    if (keep.has(i)) out.files = m.files;
+    else if (m.names && m.names.length && !(m.textFiles && m.textFiles.length)) text += "\n\n[Attached earlier: " + m.names.join(", ") + " - the file content is not available now]";
+    out.text = text; return out;
+  });
+}
+const form = $("form"), input = $("input"), send = $("send"), chat = $("chat");
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  let text = input.value.trim();
+  if (!text && !pending.length) return;
+  if (!text) text = "Please read the attached file(s) and tell me what is in them.";
+  input.value = "";
+  const msg = { role: "user", text, names: pending.map((p) => p.name), files: pending.filter((p) => p.files).map((p) => p.files), textFiles: pending.filter((p) => p.textFile).map((p) => p.textFile) };
+  pending = []; drawChips(); addMsg("user", text, msg); cur.messages.push(msg); send.disabled = true;
+  const wait = addMsg("wait", think ? "Thinking\u2026" : "\u2026"); wait.className = "msg bot";
+  try {
+    const r = await fetch(WORKER_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: buildPayload(), think, v: 2 }) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || "Request failed");
+    wait.remove(); cur.messages.push({ role: "model", text: d.reply }); addMsg("model", d.reply);
+    if (cur.messages.length === 2) cur.title = (msg.names[0] && text.startsWith("Please read the attached") ? msg.names[0] : text).slice(0, 40);
+    cur.updated = Date.now(); ensureSaved(); save(); setTitle();
+  } catch (err) { wait.remove(); cur.messages.pop(); addMsg("err", "Could not get a reply: " + err.message + ". Try again."); }
+  send.disabled = false; chat.scrollTop = chat.scrollHeight; input.focus();
+});
+input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey && window.innerWidth > 700) { e.preventDefault(); form.requestSubmit(); } });
+
+/* ---------- find in chat ---------- */
+function clearMarks(){ chat.querySelectorAll(".msg").forEach((b) => b.classList.remove("hit", "cur")); matches = []; findIdx = -1; }
+function openFind(){ closeSheet(); $("findbar").classList.add("open"); $("fq").focus(); }
+function closeFind(){ $("findbar").classList.remove("open"); $("fq").value = ""; $("fc").textContent = ""; clearMarks(); }
+function doFind(step){
+  const q = $("fq").value.trim().toLowerCase(); const prev = findIdx; clearMarks();
+  if (!q) { $("fc").textContent = ""; return; }
+  matches = Array.from(chat.querySelectorAll(".msg")).filter((b) => b.textContent.toLowerCase().includes(q));
+  if (!matches.length) { $("fc").textContent = "No match"; return; }
+  matches.forEach((b) => b.classList.add("hit"));
+  findIdx = step ? ((prev < 0 ? 0 : prev) + step + matches.length) % matches.length : 0;
+  matches[findIdx].classList.add("cur"); matches[findIdx].scrollIntoView({ block: "center" });
+  $("fc").textContent = (findIdx + 1) + " of " + matches.length;
+}
+$("fq").addEventListener("input", () => doFind(0));
+$("fq").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); doFind(1); } });
+$("fnext").addEventListener("click", () => doFind(1)); $("fprev").addEventListener("click", () => doFind(-1)); $("fclose").addEventListener("click", closeFind);
+
+/* ---------- sheets (chat options) ---------- */
+function openSheet(build){ const s = $("sheet"); s.innerHTML = ""; const box = document.createElement("div"); box.className = "box"; build(box); s.appendChild(box); s.classList.add("open"); }
+function closeSheet(){ $("sheet").classList.remove("open"); }
+$("sheet").addEventListener("click", (e) => { if (e.target === $("sheet")) closeSheet(); });
+function srow(box, icon, label, fn, danger){ const b = document.createElement("button"); b.type = "button"; b.className = "srow" + (danger ? " danger" : ""); b.innerHTML = ico(icon) + "<span></span>"; b.lastChild.textContent = label; b.addEventListener("click", fn); box.appendChild(b); }
+function noteEl(box, t){ const n = document.createElement("div"); n.className = "note"; n.textContent = t; box.appendChild(n); }
+function transcript(){ return cur.messages.map((m) => (m.role === "user" ? "You: " : "SIR P Ai: ") + m.text).join("\n\n"); }
+function optionsSheet(){
+  if (!cur || !cur.messages.length) return;
+  openSheet((box) => {
+    srow(box, "share", "Share", async () => { closeSheet(); const t = transcript(); if (navigator.share) { try { await navigator.share({ title: cur.title, text: t }); } catch {} } else { toast((await copyText(t)) ? "Chat copied" : "Could not share"); } });
+    srow(box, "pin", cur.pinned ? "Unpin" : "Pin", () => { ensureSaved(); cur.pinned = !cur.pinned; save(); closeSheet(); toast(cur.pinned ? "Pinned" : "Unpinned"); });
+    srow(box, "folder", cur.project ? "Project: " + cur.project : "Add to project", projectSheet);
+    srow(box, "clip", "Uploaded files", filesSheet);
+    srow(box, "search", "Find in chat", openFind);
+    srow(box, "home", "Add to home", () => { closeSheet(); installApp(); });
+    srow(box, "archive", cur.archived ? "Unarchive" : "Archive", () => { ensureSaved(); cur.archived = !cur.archived; save(); closeSheet(); if (cur.archived) { newChat(); toast("Chat archived"); } else toast("Chat restored"); });
+    srow(box, "trash", "Delete", () => { closeSheet(); if (confirm("Delete this chat from this phone?")) { data.chats = data.chats.filter((c) => c !== cur); save(); newChat(); toast("Chat deleted"); } }, true);
+  });
+}
+function projectSheet(){
+  openSheet((box) => {
+    const h = document.createElement("h2"); h.textContent = "Add to project"; box.appendChild(h);
+    data.projects.forEach((p) => srow(box, "folder", p, () => { ensureSaved(); cur.project = p; save(); closeSheet(); toast("Added to " + p); }));
+    srow(box, "plus", "New project", () => { const n = (prompt("Project name") || "").trim(); if (!n) return; if (!data.projects.includes(n)) data.projects.push(n); ensureSaved(); cur.project = n; save(); closeSheet(); toast("Added to " + n); });
+    if (cur.project) srow(box, "back", "Remove from project", () => { cur.project = null; save(); closeSheet(); toast("Removed from project"); });
+  });
+}
+function filesSheet(){
+  openSheet((box) => {
+    const h = document.createElement("h2"); h.textContent = "Uploaded files"; box.appendChild(h);
+    const names = []; cur.messages.forEach((m) => (m.names || []).forEach((n) => names.push(n)));
+    if (!names.length) noteEl(box, "You have not attached any files in this chat."); else names.forEach((n) => srow(box, "clip", n, () => {}));
+    noteEl(box, "Only the file names are kept for now. Saving the files themselves comes later with accounts.");
+  });
+}
+function installApp(){ if (deferred) { deferred.prompt(); deferred = null; } else toast("Open the browser menu and tap Install app or Add to Home screen"); }
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferred = e; });
+window.addEventListener("appinstalled", () => { deferred = null; });
+
+/* ---------- history ---------- */
+function openHistory(){ $("panel").classList.add("open"); $("hq").value = ""; buildList(); }
+function closePanel(){ $("panel").classList.remove("open"); }
+function when(t){ try { return new Date(t).toLocaleDateString(); } catch { return ""; } }
+function item(c){
+  const b = document.createElement("button"); b.type = "button"; b.className = "item";
+  const t = document.createElement("div"); t.className = "t"; t.textContent = (c.pinned ? "\u{1F4CC} " : "") + c.title;
+  const s = document.createElement("div"); s.className = "s"; s.textContent = when(c.updated) + (c.project ? " \u00B7 " + c.project : "");
+  b.appendChild(t); b.appendChild(s); b.addEventListener("click", () => { openChat(c); closePanel(); }); return b;
+}
+function section(L, title, chats, removeProject){
+  const lab = document.createElement("div"); lab.className = "lab"; lab.textContent = title;
+  if (removeProject) { const r = document.createElement("button"); r.type = "button"; r.textContent = "Remove"; r.addEventListener("click", () => { if (confirm("Remove the project \"" + removeProject + "\"? Its chats stay in Recent.")) { data.projects = data.projects.filter((p) => p !== removeProject); data.chats.forEach((c) => { if (c.project === removeProject) c.project = null; }); save(); buildList(); } }); lab.appendChild(r); }
+  L.appendChild(lab); chats.forEach((c) => L.appendChild(item(c)));
+}
+function buildList(){
+  const q = $("hq").value.trim().toLowerCase(), L = $("list"); L.innerHTML = "";
+  const match = (c) => !q || c.title.toLowerCase().includes(q) || c.messages.some((m) => (m.text || "").toLowerCase().includes(q));
+  const act = data.chats.filter((c) => !c.archived && match(c)).sort((a, b) => b.updated - a.updated);
+  const pinned = act.filter((c) => c.pinned); if (pinned.length) section(L, "PINNED", pinned);
+  data.projects.forEach((p) => { const xs = act.filter((c) => !c.pinned && c.project === p); if (xs.length || !q) section(L, "PROJECT: " + p.toUpperCase(), xs, p); });
+  const rest = act.filter((c) => !c.pinned && !c.project); if (rest.length) section(L, "RECENT", rest);
+  const arch = data.chats.filter((c) => c.archived && match(c));
+  if (arch.length) { const t = document.createElement("button"); t.type = "button"; t.className = "item"; t.textContent = (showArchived ? "Hide" : "Show") + " archived chats (" + arch.length + ")"; t.addEventListener("click", () => { showArchived = !showArchived; buildList(); }); L.appendChild(t); if (showArchived) arch.forEach((c) => L.appendChild(item(c))); }
+  if (!L.children.length) { const n = document.createElement("div"); n.className = "none"; n.textContent = q ? "No chats match your search." : "No saved chats yet."; L.appendChild(n); }
+}
+$("bHist").addEventListener("click", openHistory); $("pClose").addEventListener("click", closePanel); $("hq").addEventListener("input", buildList);
+$("pProj").addEventListener("click", () => { const n = (prompt("Project name") || "").trim(); if (n && !data.projects.includes(n)) { data.projects.push(n); save(); buildList(); } });
+$("bNew").addEventListener("click", newChat); $("bOpt").addEventListener("click", optionsSheet);
+
+newChat();
+if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+</script>
+</body>
+</html>
